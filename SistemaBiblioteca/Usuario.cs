@@ -6,6 +6,7 @@ public abstract class Usuario
     private string? _email;
     private bool _estadoPrestamo;
     private int _contadorPrestamos;
+
     public string? Nombre
     {
         get => _nombre;

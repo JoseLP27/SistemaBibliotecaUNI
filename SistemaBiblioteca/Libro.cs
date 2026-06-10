@@ -83,4 +83,9 @@
         return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Disponible} - Stock: {Stock}";
     }
 
+    public virtual void MostrarInfo()
+    {
+        Console.WriteLine(ToString());
+    }
+
 }
