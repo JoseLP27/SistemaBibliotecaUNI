@@ -1,23 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 public abstract class Usuario
 {
-    private int _id;
     private string? _nombre;
     private string? _apellido;
     private string? _email;
     private bool _estadoPrestamo;
-
-    public int Id
-    {
-        get => _id;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentException("[ERROR]: El ID no puede ser negativo.");
-            _id = value;
-        }
-    }
-
+    private int _contadorPrestamos;
     public string? Nombre
     {
         get => _nombre;
@@ -49,11 +37,22 @@ public abstract class Usuario
 
     public bool EstadoPrestamo { get; set;}
 
-    private string ValidarTexto(string? value, string campo)
+    public int ContadorPrestamos => _contadorPrestamos;
+
+    public string ValidarTexto(string? value, string campo)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(value) || string.IsNullOrEmpty(value))
             throw new ArgumentException($"{campo} invalido.");
         return value.Trim();
+    }
+
+    public Usuario (string? nombre, string? apellido, string? email, bool estadoPrestamo)
+    {
+        Nombre = nombre;
+        Apellido = apellido;
+        Email = email;
+        EstadoPrestamo = estadoPrestamo;
+        _contadorPrestamos = 0;
     }
 
     public abstract void HacerPrestamo();
@@ -63,7 +62,7 @@ public abstract class Usuario
 
     public override string ToString()
     {
-        return $"ID: {Id} | Nombre: {NombreCompleto} | Email: {Email}";
+        return $"Nombre: {NombreCompleto} | Email: {Email}";
     }
     public virtual void MostrarMiInfo()
     {
