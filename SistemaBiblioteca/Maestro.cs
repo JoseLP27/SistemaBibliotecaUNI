@@ -3,11 +3,11 @@
     private string? _codigoDocente;
     private string? _departamento;
 
-    public Maestro(string? nombre, string? apellido, string? email, bool estadoPrestamo, string codigodocente, string departameto)
-        : base(nombre, apellido, email, estadoPrestamo)
+    public Maestro(string? nombre, string? apellido, string? email, string? codigodocente,
+        string? departamento, bool puedeprestar) : base(nombre, apellido, email, puedeprestar)
     {
-        Departamento = departameto;
         CodigoDocente = codigodocente;
+        Departamento = departamento;
     }
 
     public string? CodigoDocente
@@ -34,14 +34,21 @@
         }
     }
 
-    public override void CalcularLimitePrestamos()
+    public override int CalcularLimitePrestamos()
     {
-        throw new NotImplementedException();
+        return 10;
     }
 
-    public override int CalcularMulta(int DiasRetraso)
+    public override double CalcularMulta(int DiasRetraso)
     {
-        throw new NotImplementedException();
+        double total = 0;
+        foreach (var libro in _librosPrestados.Values)
+            total += libro.ObtenerTarifaMulta() * DiasRetraso;
+
+        if (DiasRetraso <= 3 && _librosPrestados.Count <= 3)
+            total = total * 0.70;
+
+        return total;
     }
 
     public override void Devolver()

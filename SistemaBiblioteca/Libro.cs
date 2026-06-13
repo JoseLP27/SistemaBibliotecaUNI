@@ -4,7 +4,7 @@
     private string? _titulo;
     private string? _autor;
     private int _anioPublicacion;
-    private bool _disponible;
+    private bool _estado;
     private int _stock;
 
     public Libro(string codigo, string titulo, string autor, int anioPublicacion)
@@ -13,7 +13,7 @@
         Titulo = titulo;
         Autor = autor;
         AnioPublicacion = anioPublicacion;
-        Disponible = true;
+        Estado = EstadoMaterial.Disponible;
     }
 
     public string? CodigoISBN
@@ -60,11 +60,7 @@
         }
     }
 
-    public bool Disponible
-    {
-        get => _disponible;
-        set => _disponible = value;
-    }
+    public EstadoMaterial Estado { get; set; }
 
     public int Stock
     {
@@ -73,14 +69,17 @@
         {
             if (value < 0)
                 throw new ArgumentException("[ERROR]: El stock no puede ser negativo.");
+            _stock = value;
         }
     }
 
     public abstract int ObtenerDiasMaximos();
     public abstract int ObtenerTarifaMulta();
+    public abstract bool EstaDisponible();
+
     public override string ToString()
     {
-        return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Disponible} - Stock: {Stock}";
+        return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Estado} - Stock: {Stock}";
     }
 
     public virtual void MostrarInfo()

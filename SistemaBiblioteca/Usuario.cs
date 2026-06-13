@@ -4,8 +4,8 @@ public abstract class Usuario
     private string? _nombre;
     private string? _apellido;
     private string? _email;
-    private bool _estadoPrestamo;
     private int _contadorPrestamos;
+    protected Dictionary<string, Libro> _librosPrestados = new();
 
     public string? Nombre
     {
@@ -36,7 +36,7 @@ public abstract class Usuario
         }
     }
 
-    public bool EstadoPrestamo { get; set;}
+    public bool PuedePrestar { get; set;}
 
     public int ContadorPrestamos => _contadorPrestamos;
 
@@ -47,20 +47,19 @@ public abstract class Usuario
         return value.Trim();
     }
 
-    public Usuario (string? nombre, string? apellido, string? email, bool estadoPrestamo)
+    public Usuario (string? nombre, string? apellido, string? email, bool puedeprestar)
     {
         Nombre = nombre;
         Apellido = apellido;
         Email = email;
-        EstadoPrestamo = estadoPrestamo;
+        PuedePrestar = puedeprestar;
         _contadorPrestamos = 0;
     }
 
     public abstract void HacerPrestamo();
     public abstract void Devolver();
-    public abstract void CalcularLimitePrestamos();
-    public abstract int CalcularMulta(int DiasRetraso);
-
+    public abstract int CalcularLimitePrestamos();
+    public abstract double CalcularMulta(int DiasRetraso);
     public override string ToString()
     {
         return $"Nombre: {NombreCompleto} | Email: {Email}";

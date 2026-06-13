@@ -1,0 +1,1 @@
+﻿public enum EstadoMaterial { Disponible, Agotado, EnMantenimiento}
