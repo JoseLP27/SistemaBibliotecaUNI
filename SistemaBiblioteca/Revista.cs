@@ -1,12 +1,11 @@
-﻿public class Revista : Libro
+﻿public class Revista : MaterialBibliografico
 {
     private int _numeroedicion;
     private int _volumen;
     private string? _periodicidad;
-    private Dictionary<string, Revista> _revistas = new();
 
     public Revista(string codigo, string titulo, string autor, int numeroedicion, int volumen,
-        string? periodicidad, int anioPublicacion) : base(codigo, titulo, autor, anioPublicacion)
+        string? periodicidad, int anioPublicacion, int stock) : base(codigo, titulo, autor, anioPublicacion, stock)
     {
         NumeroEdicion  = numeroedicion;
         Volumen = volumen;
@@ -45,11 +44,6 @@
                 throw new ArgumentException("[ERROR]: La periodicidad no puede estar vacia.");
             _periodicidad = value;
         }
-    }
-
-    public override bool EstaDisponible()
-    {
-        throw new NotImplementedException();
     }
 
     public override int ObtenerDiasMaximos()

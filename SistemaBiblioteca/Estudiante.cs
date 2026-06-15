@@ -37,16 +37,6 @@ public class Estudiante : Usuario
 
     public int AnioIngreso => _carnet != null ? int.Parse(_carnet.Substring(0, 4)) : 0;
 
-    public override void HacerPrestamo()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void Devolver()
-    {
-        throw new NotImplementedException();
-    }
-
     public override int CalcularLimitePrestamos()
     {
         return 5;

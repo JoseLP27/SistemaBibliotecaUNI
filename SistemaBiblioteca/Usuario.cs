@@ -5,7 +5,7 @@ public abstract class Usuario
     private string? _apellido;
     private string? _email;
     private int _contadorPrestamos;
-    protected Dictionary<string, Libro> _librosPrestados = new();
+    protected Dictionary<string, MaterialBibliografico> _librosPrestados = new();
 
     public string? Nombre
     {
@@ -39,6 +39,7 @@ public abstract class Usuario
     public bool PuedePrestar { get; set;}
 
     public int ContadorPrestamos => _contadorPrestamos;
+    public void IncrementarContador() => _contadorPrestamos++;
 
     public string ValidarTexto(string? value, string campo)
     {
@@ -56,17 +57,11 @@ public abstract class Usuario
         _contadorPrestamos = 0;
     }
 
-    public abstract void HacerPrestamo();
-    public abstract void Devolver();
     public abstract int CalcularLimitePrestamos();
     public abstract double CalcularMulta(int DiasRetraso);
     public override string ToString()
     {
         return $"Nombre: {NombreCompleto} | Email: {Email}";
-    }
-    public virtual void MostrarMiInfo()
-    {
-        Console.WriteLine(ToString());
     }
 
 }

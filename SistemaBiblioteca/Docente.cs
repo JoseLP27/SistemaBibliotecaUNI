@@ -1,9 +1,9 @@
-﻿public class Maestro : Usuario
+﻿public class Docente : Usuario
 {
     private string? _codigoDocente;
     private string? _departamento;
 
-    public Maestro(string? nombre, string? apellido, string? email, string? codigodocente,
+    public Docente(string? nombre, string? apellido, string? email, string? codigodocente,
         string? departamento, bool puedeprestar) : base(nombre, apellido, email, puedeprestar)
     {
         CodigoDocente = codigodocente;
@@ -51,14 +51,6 @@
         return total;
     }
 
-    public override void Devolver()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void HacerPrestamo()
-    {
-        throw new NotImplementedException();
-    }
+    
 
 }

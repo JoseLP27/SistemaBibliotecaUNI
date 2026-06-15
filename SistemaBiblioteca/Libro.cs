@@ -1,90 +1,62 @@
-﻿public abstract class Libro
+﻿public class Libro : MaterialBibliografico
 {
-    private string? _codigoISBN;
-    private string? _titulo;
-    private string? _autor;
-    private int _anioPublicacion;
-    private bool _estado;
-    private int _stock;
+    private string? _estante;
+    private string? _signaturaTopografica;
+    private string? _estadoConservacion;
 
-    public Libro(string codigo, string titulo, string autor, int anioPublicacion)
+    public Libro(string codigoisbn, string titulo, string autor, int anioPublicacion, string estante, string signatura, string estadoconv, int stock)
+        : base(codigoisbn, titulo, autor, anioPublicacion, stock)
     {
-        CodigoISBN = codigo;
-        Titulo = titulo;
-        Autor = autor;
-        AnioPublicacion = anioPublicacion;
-        Estado = EstadoMaterial.Disponible;
+        Estante = estante;
+        SignaturaTopografica = signatura;
+        EstadoConservacion = estadoconv;
     }
 
-    public string? CodigoISBN
+    public string? Estante
     {
-        get => _codigoISBN;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value) || value.Length != 13)
-                throw new ArgumentException("[ERROR]: El ISBN es obligatorio.");
-            _codigoISBN = value;
-        }
-    }
-
-    public string? Titulo
-    {
-        get => _titulo;
+        get => _estante;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("[ERROR]: El título no puede estar vacío.");
-            _titulo = value;
+                throw new ArgumentException("[ERROR]: La ubicación del estante es obligatoria.");
+            _estante = value;
         }
     }
 
-    public string? Autor
+    public string? SignaturaTopografica
     {
-        get => _autor;
+        get => _signaturaTopografica;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("[ERROR]: El autor no puede estar vacío.");
-            _autor = value;
+                throw new ArgumentException("[ERROR]: La signatura topográfica es obligatoria.");
+            _signaturaTopografica = value;
         }
     }
 
-    public int AnioPublicacion
+    public string? EstadoConservacion
     {
-        get => _anioPublicacion;
+        get => _estadoConservacion;
         set
         {
-            if (value < 1900 || value > 2026)
-                throw new ArgumentException("[ERROR]: Año de publicación inválido.");
-            _anioPublicacion = value;
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("[ERROR]: El estado de conservación no puede estar vacío.");
+            _estadoConservacion = value;
         }
     }
 
-    public EstadoMaterial Estado { get; set; }
-
-    public int Stock
+    public override int ObtenerDiasMaximos()
     {
-        get => _stock;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentException("[ERROR]: El stock no puede ser negativo.");
-            _stock = value;
-        }
+        return 7;
     }
 
-    public abstract int ObtenerDiasMaximos();
-    public abstract int ObtenerTarifaMulta();
-    public abstract bool EstaDisponible();
+    public override int ObtenerTarifaMulta()
+    {
+        return 5;
+    }
 
     public override string ToString()
     {
-        return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Estado} - Stock: {Stock}";
+        return $"{base.ToString()} | Estante: {Estante} | Lomo: {SignaturaTopografica} | Estado: {EstadoConservacion}";
     }
-
-    public virtual void MostrarInfo()
-    {
-        Console.WriteLine(ToString());
-    }
-
 }
