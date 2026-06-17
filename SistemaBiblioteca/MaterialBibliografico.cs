@@ -1,4 +1,7 @@
-﻿public abstract class MaterialBibliografico
+﻿[System.Text.Json.Serialization.JsonDerivedType(typeof(Libro), "Libro")]
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Revista), "Revista")]
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Monografia), "Monografia")]
+public abstract class MaterialBibliografico
 {
     private string? _codigoISBN;
     private string? _titulo;
@@ -15,6 +18,8 @@
         Stock = stock;
         Estado = EstadoMaterial.Disponible;
     }
+
+    protected MaterialBibliografico() { }
 
     public string? CodigoISBN
     {
@@ -54,7 +59,7 @@
         get => _anioPublicacion;
         set
         {
-            if (value < 1900 || value > 2026)
+            if (value < 1800 || value > 2026)
                 throw new ArgumentException("[ERROR]: Año de publicación inválido.");
             _anioPublicacion = value;
         }

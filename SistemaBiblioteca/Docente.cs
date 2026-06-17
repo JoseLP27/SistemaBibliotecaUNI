@@ -10,6 +10,8 @@
         Departamento = departamento;
     }
 
+    public Docente() { }
+
     public string? CodigoDocente
     {
         get => _codigoDocente;

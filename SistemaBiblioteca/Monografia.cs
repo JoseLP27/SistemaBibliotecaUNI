@@ -13,6 +13,8 @@
         Carrera = carrera;
     }
 
+    public Monografia() { }
+
     public string? Tutores
     {
         get => _tutores;

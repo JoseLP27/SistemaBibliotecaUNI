@@ -13,6 +13,8 @@ public class Estudiante : Usuario
         Carrera = carrera;
     }
 
+    public Estudiante() { }
+
     public string? Carnet
     {
         get => _carnet;

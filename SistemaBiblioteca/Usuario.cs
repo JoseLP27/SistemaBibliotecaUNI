@@ -1,4 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Estudiante), "Estudiante")]
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Docente), "Docente")]
 public abstract class Usuario
 {
     private string? _nombre;
@@ -56,6 +58,8 @@ public abstract class Usuario
         PuedePrestar = puedeprestar;
         _contadorPrestamos = 0;
     }
+
+    protected Usuario() { }
 
     public abstract int CalcularLimitePrestamos();
     public abstract double CalcularMulta(int DiasRetraso);

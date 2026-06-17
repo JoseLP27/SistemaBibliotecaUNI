@@ -1,4 +1,4 @@
-﻿public class Prestamo
+﻿public class RegistroPrestamo
 {
     public Usuario Usuario { get; set; }
     public MaterialBibliografico Material { get; set; }
@@ -6,13 +6,18 @@
     public DateTime FechaDevolucion { get; set; }
     public bool Devuelto { get; set; }
 
-    public Prestamo(Usuario usuario, MaterialBibliografico material)
+    public RegistroPrestamo(Usuario usuario, MaterialBibliografico material)
     {
         Usuario = usuario;
         Material = material;
         FechaPrestamo = DateTime.Now;
         FechaDevolucion = DateTime.Now.AddDays(material.ObtenerDiasMaximos());
         Devuelto = false;
+    }
+
+    public RegistroPrestamo()
+    {
+        // requerido por xml serializer
     }
 
     public int CalcularDiasRetraso()

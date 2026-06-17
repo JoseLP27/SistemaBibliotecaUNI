@@ -12,6 +12,8 @@
         EstadoConservacion = estadoconv;
     }
 
+    public Libro() { }
+
     public string? Estante
     {
         get => _estante;

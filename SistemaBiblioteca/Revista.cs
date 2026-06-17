@@ -12,6 +12,8 @@
         Periodicidad = periodicidad;
     }
 
+    public Revista() { }
+
     public int NumeroEdicion
     {
         get => _numeroedicion;
