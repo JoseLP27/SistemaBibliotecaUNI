@@ -1,13 +1,16 @@
 ﻿using System.Text.RegularExpressions;
+using System.Xml.Serialization;
+
 public class Estudiante : Usuario
 {
     private string? _carnet;
     private string? _carrera;
 
+    [XmlIgnore]
     private readonly string formatocarnet = @"^\d{4}-\d{4}U$";
 
-    public Estudiante(string? nombre, string? apellido, string? carnet, string? carrera
-        , string? email, bool puedeprestar) : base(nombre, apellido, email, puedeprestar)
+    public Estudiante(string? nombre, string? apellido, string? carnet, string? carrera,
+        string? email, bool puedeprestar) : base(nombre, apellido, email, puedeprestar)
     {
         Carnet = carnet;
         Carrera = carrera;
@@ -37,6 +40,7 @@ public class Estudiante : Usuario
         }
     }
 
+    [XmlIgnore]
     public int AnioIngreso => _carnet != null ? int.Parse(_carnet.Substring(0, 4)) : 0;
 
     public override int CalcularLimitePrestamos()

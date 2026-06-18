@@ -1,10 +1,37 @@
-﻿ISerializer<MaterialBibliografico> materialSerializer = new JsonFileSerializer<MaterialBibliografico>();
-ISerializer<Usuario> usuarioSerializer = new JsonFileSerializer<Usuario>();
-ISerializer<RegistroPrestamo> prestamoSerializer = new JsonFileSerializer<RegistroPrestamo>();
+﻿Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine("  ╔═════════════════════════════════════╗");
+Console.WriteLine("  ║      SISTEMA DE BIBLIOTECA          ║");
+Console.WriteLine("  ╠═════════════════════════════════════╣");
+Console.WriteLine("  ║  1. JSON                            ║");
+Console.WriteLine("  ║  2. XML                             ║");
+Console.WriteLine("  ╚═════════════════════════════════════╝");
+Console.ResetColor();
+Console.Write("\n  Formato de almacenamiento: ");
+string formato = Console.ReadLine()!.Trim();
 
-MaterialRepository materialRepo = new(materialSerializer, "materiales.json");
-UsuarioRepository usuarioRepo = new(usuarioSerializer, "usuarios.json");
-RegistroPrestamoRepository prestamoRepo = new(prestamoSerializer, "prestamos.json");
+ISerializer<MaterialBibliografico> materialSerializer;
+ISerializer<Usuario> usuarioSerializer;
+ISerializer<RegistroPrestamo> prestamoSerializer;
+string TipoArchivo;
+
+if (formato == "2")
+{
+    materialSerializer = new XmlFileSerializer<MaterialBibliografico>();
+    usuarioSerializer = new XmlFileSerializer<Usuario>();
+    prestamoSerializer = new XmlFileSerializer<RegistroPrestamo>();
+    TipoArchivo = "xml";
+}
+else
+{
+    materialSerializer = new JsonFileSerializer<MaterialBibliografico>();
+    usuarioSerializer = new JsonFileSerializer<Usuario>();
+    prestamoSerializer = new JsonFileSerializer<RegistroPrestamo>();
+    TipoArchivo = "json";
+}
+
+MaterialRepository materialRepo = new(materialSerializer, $"Registros/materiales.{TipoArchivo}");
+UsuarioRepository usuarioRepo = new(usuarioSerializer, $"Registros/usuarios.{TipoArchivo}");
+RegistroPrestamoRepository prestamoRepo = new(prestamoSerializer, $"Registros/prestamos.{TipoArchivo}");
 
 GestionBiblioteca gestion = new(materialRepo, usuarioRepo, prestamoRepo);
 
@@ -77,6 +104,88 @@ int LeerEntero(string prompt, int min = 1, int max = int.MaxValue)
             return valor;
 
         Error($"Ingrese un número válido entre {min} y {max}.");
+    }
+}
+
+string LeerISBN(string prompt)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string valor = Console.ReadLine()!.Trim();
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            Error("El ISBN no puede estar vacío.");
+            continue;
+        }
+        if (valor.Length != 13)
+        {
+            Error($"[ERROR]: El ISBN debe tener exactamente 13 caracteres. Ingresaste {valor.Length}.");
+            continue;
+        }
+        return valor;
+    }
+}
+
+string LeerCarnet(string prompt)
+{
+    var regex = new System.Text.RegularExpressions.Regex(@"^\d{4}-\d{4}U$");
+    while (true)
+    {
+        Console.Write(prompt);
+        string valor = Console.ReadLine()!.Trim();
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            Error("El carnet no puede estar vacío.");
+            continue;
+        }
+        if (!regex.IsMatch(valor))
+        {
+            Error("[ERROR]: Formato de carnet inválido. Ejemplo correcto: 2024-0001U");
+            continue;
+        }
+        return valor;
+    }
+}
+
+string LeerEmail(string prompt)
+{
+    var regex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+    while (true)
+    {
+        Console.Write(prompt);
+        string valor = Console.ReadLine()!.Trim();
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            Error("El email no puede estar vacío.");
+            continue;
+        }
+        if (!regex.IsMatch(valor))
+        {
+            Error("[ERROR]: El email ingresado no cumple con el formato de email.");
+            continue;
+        }
+        return valor;
+    }
+}
+
+string LeerCodigoDocente(string prompt)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string valor = Console.ReadLine()!.Trim();
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            Error("El código de docente no puede estar vacío.");
+            continue;
+        }
+        if (valor.Length != 4)
+        {
+            Error($"[ERROR]: El código de docente debe tener exactamente 4 caracteres. Ingresaste {valor.Length}.");
+            continue;
+        }
+        return valor;
     }
 }
 
@@ -171,6 +280,8 @@ while (!salir)
     Console.WriteLine("  ║  8.  Préstamos por usuario          ║");
     Console.WriteLine("  ║  9.  Quién tiene un material        ║");
     Console.WriteLine("  ║  10. Consultar multa                ║");
+    Console.WriteLine("  ║  11. Eliminar material              ║");
+    Console.WriteLine("  ║  12. Eliminar usuario               ║");
     Console.WriteLine("  ║  0.  Salir                          ║");
     Console.WriteLine("  ╚═════════════════════════════════════╝");
     Console.ResetColor();
@@ -193,7 +304,7 @@ while (!salir)
                 {
                     Console.WriteLine($"\n  ── Material {i + 1} de {cantMat} ──────────────");
 
-                    string isbn = LeerTexto("  ISBN (13 dígitos): ");
+                    string isbn = LeerISBN("  ISBN (13 dígitos): ");
                     string titulo = LeerTexto("  Título: ");
                     string autor = LeerSoloLetras("  Autor: ");
                     int anio = LeerEntero("  Año: ", 1900, 2026);
@@ -242,18 +353,17 @@ while (!salir)
                     Console.WriteLine($"\n  ── Usuario {i + 1} de {cantUsu} ───────────────");
                     string nombre = LeerSoloLetras("  Nombre: ");
                     string apellido = LeerSoloLetras("  Apellido: ");
-
-                    string emailUsu = LeerTexto("  Email: ");
+                    string emailUsu = LeerEmail("  Email: ");
 
                     if (tipoUsu == "1")
                     {
-                        string carnet = LeerTexto("  Carnet (ej. 2024-0001U): ");
+                        string carnet = LeerCarnet("  Carnet (ej. 2024-0001U): ");
                         string carreraEst = LeerSoloLetras("  Carrera: ");
                         gestion.RegistrarEstudiante(nombre, apellido, carnet, carreraEst, emailUsu);
                     }
                     else if (tipoUsu == "2")
                     {
-                        string codigo = LeerTexto("  Código docente (4 caracteres): ");
+                        string codigo = LeerCodigoDocente("  Código docente (4 caracteres): ");
                         string depto = LeerSoloLetras("  Departamento: ");
                         gestion.RegistrarDocente(nombre, apellido, emailUsu, codigo, depto);
                     }
@@ -271,8 +381,8 @@ while (!salir)
             case "3":
                 Console.Clear();
                 Titulo("REALIZAR PRÉSTAMO");
-                string emailPrest = LeerTexto("  Email usuario: ");
-                string isbnPrest = LeerTexto("  ISBN material: ");
+                string emailPrest = LeerEmail("  Email usuario: ");
+                string isbnPrest = LeerISBN("  ISBN material: ");
                 gestion.PrestarMaterial(emailPrest, isbnPrest);
                 Exito("Préstamo realizado.");
                 break;
@@ -280,8 +390,8 @@ while (!salir)
             case "4":
                 Console.Clear();
                 Titulo("DEVOLVER MATERIAL");
-                string emailDev = LeerTexto("  Email usuario: ");
-                string isbnDev = LeerTexto("  ISBN material: ");
+                string emailDev = LeerEmail("  Email usuario: ");
+                string isbnDev = LeerISBN("  ISBN material: ");
                 double multa = gestion.DevolverMaterial(emailDev, isbnDev);
                 if (multa > 0)
                     Error($"Devuelto con multa: C$ {multa}");
@@ -325,7 +435,7 @@ while (!salir)
             case "8":
                 Console.Clear();
                 Titulo("PRÉSTAMOS POR USUARIO");
-                string emailBusc = LeerTexto("  Email usuario: ");
+                string emailBusc = LeerEmail("  Email usuario: ");
                 var prestUsuario = gestion.ObtenerPrestamosPorUsuario(emailBusc);
                 if (prestUsuario.Count == 0)
                     Error("No se encontraron préstamos para ese usuario.");
@@ -337,7 +447,7 @@ while (!salir)
             case "9":
                 Console.Clear();
                 Titulo("QUIÉN TIENE UN MATERIAL");
-                string isbnBusc = LeerTexto("  ISBN material: ");
+                string isbnBusc = LeerISBN("  ISBN material: ");
                 var usuariosMat = gestion.ObtenerUsuariosConMaterial(isbnBusc);
                 if (usuariosMat.Count == 0)
                     Error("Nadie tiene ese material prestado o no existe.");
@@ -349,12 +459,66 @@ while (!salir)
             case "10":
                 Console.Clear();
                 Titulo("CONSULTAR MULTA");
-                string emailMul = LeerTexto("  Email usuario: ");
+                string emailMul = LeerEmail("  Email usuario: ");
                 double multaTotal = gestion.ConsultarMulta(emailMul);
                 if (multaTotal > 0)
                     Error($"Multa pendiente: C$ {multaTotal}");
                 else
                     Exito("Sin multa pendiente.");
+                break;
+
+            case "11":
+                Console.Clear();
+                Titulo("ELIMINAR MATERIAL");
+                string isbnElim = LeerISBN("  ISBN del material a eliminar: ");
+                try
+                {
+                    var matElim = gestion.BuscarMaterial(isbnElim);
+                    Console.WriteLine("\n  Material encontrado:");
+                    MostrarMaterial(matElim);
+                    Console.Write("  ¿Confirmar eliminación? (s/n): ");
+                    string confirmMat = Console.ReadLine()!.Trim().ToLower();
+                    if (confirmMat == "s")
+                    {
+                        gestion.EliminarMaterial(isbnElim);
+                        Exito("Material eliminado correctamente.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("\n  Operación cancelada.");
+                    }
+                }
+                catch (ArgumentException ex)
+                {
+                    Error(ex.Message);
+                }
+                break;
+
+            case "12":
+                Console.Clear();
+                Titulo("ELIMINAR USUARIO");
+                string emailElim = LeerEmail("  Email del usuario a eliminar: ");
+                try
+                {
+                    var usuElim = gestion.BuscarUsuario(emailElim);
+                    Console.WriteLine("\n  Usuario encontrado:");
+                    MostrarUsuario(usuElim);
+                    Console.Write("  ¿Confirmar eliminación? (si/no): ");
+                    string confirmUsu = Console.ReadLine()!.Trim().ToLower();
+                    if (confirmUsu == "si")
+                    {
+                        gestion.EliminarUsuario(emailElim);
+                        Exito("Usuario eliminado correctamente.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("\n  Operación cancelada.");
+                    }
+                }
+                catch (ArgumentException ex)
+                {
+                    Error(ex.Message);
+                }
                 break;
 
             case "0":
@@ -387,5 +551,5 @@ while (!salir)
 }
 
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine("\n  ¡Hasta luego!");
+Console.WriteLine("\n  Saliendo del sistema..");
 Console.ResetColor();

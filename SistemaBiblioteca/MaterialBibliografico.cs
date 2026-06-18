@@ -1,6 +1,15 @@
-﻿[System.Text.Json.Serialization.JsonDerivedType(typeof(Libro), "Libro")]
+﻿//Necesario para el XML Serializer
+using System.Xml.Serialization;
+
+[XmlInclude(typeof(Libro))]
+[XmlInclude(typeof(Revista))]
+[XmlInclude(typeof(Monografia))]
+
+//Necesario para el JSON serializer
+[System.Text.Json.Serialization.JsonDerivedType(typeof(Libro), "Libro")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Revista), "Revista")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Monografia), "Monografia")]
+
 public abstract class MaterialBibliografico
 {
     private string? _codigoISBN;
@@ -80,6 +89,7 @@ public abstract class MaterialBibliografico
 
     public abstract int ObtenerDiasMaximos();
     public abstract int ObtenerTarifaMulta();
+
     public bool EstaDisponible()
     {
         return Estado == EstadoMaterial.Disponible && Stock > 0;

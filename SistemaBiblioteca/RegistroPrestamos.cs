@@ -1,7 +1,16 @@
-﻿public class RegistroPrestamo
+﻿using System.Xml.Serialization;
+
+public class RegistroPrestamo
 {
+    [XmlElement("Estudiante", typeof(Estudiante))]
+    [XmlElement("Docente", typeof(Docente))]
     public Usuario Usuario { get; set; }
+
+    [XmlElement("Libro", typeof(Libro))]
+    [XmlElement("Revista", typeof(Revista))]
+    [XmlElement("Monografia", typeof(Monografia))]
     public MaterialBibliografico Material { get; set; }
+
     public DateTime FechaPrestamo { get; set; }
     public DateTime FechaDevolucion { get; set; }
     public bool Devuelto { get; set; }
@@ -15,10 +24,7 @@
         Devuelto = false;
     }
 
-    public RegistroPrestamo()
-    {
-        // requerido por xml serializer
-    }
+    public RegistroPrestamo() { }
 
     public int CalcularDiasRetraso()
     {
@@ -31,4 +37,5 @@
     {
         return $"Usuario: {Usuario.NombreCompleto} | Material: {Material.Titulo} | Prestado: {FechaPrestamo:dd/MM/yyyy} | Vence: {FechaDevolucion:dd/MM/yyyy} | Devuelto: {Devuelto}";
     }
+
 }
