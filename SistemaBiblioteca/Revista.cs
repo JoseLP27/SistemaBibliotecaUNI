@@ -7,7 +7,7 @@
     public Revista(string codigo, string titulo, string autor, int numeroedicion, int volumen,
         string? periodicidad, int anioPublicacion, int stock) : base(codigo, titulo, autor, anioPublicacion, stock)
     {
-        NumeroEdicion  = numeroedicion;
+        NumeroEdicion = numeroedicion;
         Volumen = volumen;
         Periodicidad = periodicidad;
     }
@@ -20,7 +20,7 @@
         set
         {
             if (value <= 0)
-                throw new ArgumentException("El número de edición debe ser mayor a cero.");
+                throw new ArgumentException("[ERROR]: El número de edición debe ser mayor a cero.");
 
             _numeroedicion = value;
         }
@@ -31,7 +31,7 @@
         set
         {
             if (value <= 0)
-                throw new ArgumentException("El número de volumen debe ser mayor a cero.");
+                throw new ArgumentException("[ERROR]: El número de volumen debe ser mayor a cero.");
 
             _volumen = value;
         }
@@ -42,7 +42,7 @@
         get => _periodicidad;
         set
         {
-            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("[ERROR]: La periodicidad no puede estar vacia.");
             _periodicidad = value;
         }
@@ -57,4 +57,5 @@
     {
         return 3;
     }
+
 }

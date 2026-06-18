@@ -102,7 +102,6 @@ int LeerEntero(string prompt, int min = 1, int max = int.MaxValue)
         Console.Write(prompt);
         if (int.TryParse(Console.ReadLine(), out int valor) && valor >= min && valor <= max)
             return valor;
-
         Error($"Ingrese un número válido entre {min} y {max}.");
     }
 }
@@ -207,6 +206,7 @@ void MostrarUsuario(Usuario u)
     Console.WriteLine($"  Email      : {u.Email}");
     Console.WriteLine($"  Préstamos  : {u.ContadorPrestamos}");
     Console.WriteLine($"  Puede prest: {(u.PuedePrestar ? "Sí" : "No")}");
+    Console.WriteLine($"  Registro   : {u.FechaRegistro:dd/MM/yyyy}");
     Console.ResetColor();
     Console.WriteLine("  ─────────────────────────────────────");
 }
@@ -244,6 +244,7 @@ void MostrarMaterial(MaterialBibliografico m)
     Console.WriteLine($"  Estado     : {m.Estado}");
     Console.WriteLine($"  Stock      : {m.Stock}");
     Console.WriteLine($"  Días máx.  : {m.ObtenerDiasMaximos()}");
+    Console.WriteLine($"  Ingreso    : {m.FechaIngreso:dd/MM/yyyy}");
     Console.ResetColor();
     Console.WriteLine("  ─────────────────────────────────────");
 }
@@ -278,10 +279,16 @@ while (!salir)
     Console.WriteLine("  ║  6.  Ver usuarios                   ║");
     Console.WriteLine("  ║  7.  Ver préstamos activos          ║");
     Console.WriteLine("  ║  8.  Préstamos por usuario          ║");
-    Console.WriteLine("  ║  9.  Quién tiene un material        ║");
+    Console.WriteLine("  ║  9.  Consultar poseedores           ║");
     Console.WriteLine("  ║  10. Consultar multa                ║");
     Console.WriteLine("  ║  11. Eliminar material              ║");
     Console.WriteLine("  ║  12. Eliminar usuario               ║");
+    Console.WriteLine("  ║  13. Ver historial de préstamos     ║");
+    Console.WriteLine("  ║  14. Editar material                ║");
+    Console.WriteLine("  ║  15. Editar usuario                 ║");
+    Console.WriteLine("  ║  16. Buscar material por ISBN       ║");
+    Console.WriteLine("  ║  17. Buscar usuario por email       ║");
+    Console.WriteLine("  ║  18. Suspender/Habilitar préstamo   ║");
     Console.WriteLine("  ║  0.  Salir                          ║");
     Console.WriteLine("  ╚═════════════════════════════════════╝");
     Console.ResetColor();
@@ -303,11 +310,10 @@ while (!salir)
                 for (int i = 0; i < cantMat; i++)
                 {
                     Console.WriteLine($"\n  ── Material {i + 1} de {cantMat} ──────────────");
-
                     string isbn = LeerISBN("  ISBN (13 dígitos): ");
                     string titulo = LeerTexto("  Título: ");
                     string autor = LeerSoloLetras("  Autor: ");
-                    int anio = LeerEntero("  Año: ", 1900, 2026);
+                    int anio = LeerEntero("  Año: ", 1900, DateTime.Now.Year);
                     int stock = LeerEntero("  Stock: ", 1);
 
                     switch (tipoMat)
@@ -336,8 +342,7 @@ while (!salir)
                     }
                     Exito($"Material {i + 1} registrado.");
                 }
-                Console.WriteLine("\n  Registros guardados en materiales.json");
-                Console.WriteLine("  Revisa tu carpeta bin\\Debug para ver el archivo.");
+                Console.WriteLine($"\n  Registros guardados en Registros/materiales.{TipoArchivo}");
                 break;
 
             case "2":
@@ -374,8 +379,7 @@ while (!salir)
                     }
                     Exito($"Usuario {i + 1} registrado.");
                 }
-                Console.WriteLine("\n  Registros guardados en usuarios.json");
-                Console.WriteLine("  Revisa tu carpeta bin\\Debug para ver el archivo.");
+                Console.WriteLine($"\n  Registros guardados en Registros/usuarios.{TipoArchivo}");
                 break;
 
             case "3":
@@ -392,9 +396,9 @@ while (!salir)
                 Titulo("DEVOLVER MATERIAL");
                 string emailDev = LeerEmail("  Email usuario: ");
                 string isbnDev = LeerISBN("  ISBN material: ");
-                double multa = gestion.DevolverMaterial(emailDev, isbnDev);
+                decimal multa = gestion.DevolverMaterial(emailDev, isbnDev);
                 if (multa > 0)
-                    Error($"Devuelto con multa: C$ {multa}");
+                    Error($"Devuelto con multa: C$ {multa:F2}");
                 else
                     Exito("Devuelto sin multa.");
                 break;
@@ -446,11 +450,11 @@ while (!salir)
 
             case "9":
                 Console.Clear();
-                Titulo("QUIÉN TIENE UN MATERIAL");
+                Titulo("CONSULTAR POSEEDORES DE MATERIAL");
                 string isbnBusc = LeerISBN("  ISBN material: ");
                 var usuariosMat = gestion.ObtenerUsuariosConMaterial(isbnBusc);
                 if (usuariosMat.Count == 0)
-                    Error("Nadie tiene ese material prestado o no existe.");
+                    Error("Ningún usuario posee ese material actualmente.");
                 else
                     foreach (var u in usuariosMat)
                         MostrarUsuario(u);
@@ -460,9 +464,9 @@ while (!salir)
                 Console.Clear();
                 Titulo("CONSULTAR MULTA");
                 string emailMul = LeerEmail("  Email usuario: ");
-                double multaTotal = gestion.ConsultarMulta(emailMul);
+                decimal multaTotal = gestion.ConsultarMulta(emailMul);
                 if (multaTotal > 0)
-                    Error($"Multa pendiente: C$ {multaTotal}");
+                    Error($"Multa pendiente: C$ {multaTotal:F2}");
                 else
                     Exito("Sin multa pendiente.");
                 break;
@@ -484,9 +488,7 @@ while (!salir)
                         Exito("Material eliminado correctamente.");
                     }
                     else
-                    {
                         Console.WriteLine("\n  Operación cancelada.");
-                    }
                 }
                 catch (ArgumentException ex)
                 {
@@ -503,22 +505,109 @@ while (!salir)
                     var usuElim = gestion.BuscarUsuario(emailElim);
                     Console.WriteLine("\n  Usuario encontrado:");
                     MostrarUsuario(usuElim);
-                    Console.Write("  ¿Confirmar eliminación? (si/no): ");
+                    Console.Write("  ¿Confirmar eliminación? (s/n): ");
                     string confirmUsu = Console.ReadLine()!.Trim().ToLower();
-                    if (confirmUsu == "si")
+                    if (confirmUsu == "s")
                     {
                         gestion.EliminarUsuario(emailElim);
                         Exito("Usuario eliminado correctamente.");
                     }
                     else
-                    {
                         Console.WriteLine("\n  Operación cancelada.");
-                    }
                 }
                 catch (ArgumentException ex)
                 {
                     Error(ex.Message);
                 }
+                break;
+
+            case "13":
+                Console.Clear();
+                Titulo("HISTORIAL DE PRÉSTAMOS");
+                var historial = gestion.ObtenerHistorial();
+                if (historial.Count == 0)
+                    Error("No hay préstamos registrados.");
+                else
+                    foreach (var p in historial)
+                        MostrarPrestamo(p);
+                break;
+
+            case "14":
+                Console.Clear();
+                Titulo("EDITAR MATERIAL");
+                string isbnEdit = LeerISBN("  ISBN del material a editar: ");
+                var matEdit = gestion.BuscarMaterial(isbnEdit);
+                Console.WriteLine("\n  Material actual:");
+                MostrarMaterial(matEdit);
+                string tituloEdit = LeerTexto("\n  Nuevo título: ");
+                string autorEdit = LeerSoloLetras("  Nuevo autor: ");
+                int stockEdit = LeerEntero("  Nuevo stock: ", 0);
+                gestion.EditarMaterial(isbnEdit, tituloEdit, autorEdit, stockEdit);
+                Exito("Material actualizado correctamente.");
+                break;
+
+            case "15":
+                Console.Clear();
+                Titulo("EDITAR USUARIO");
+                string emailEdit = LeerEmail("  Email del usuario a editar: ");
+                var usuEdit = gestion.BuscarUsuario(emailEdit);
+                Console.WriteLine("\n  Usuario actual:");
+                MostrarUsuario(usuEdit);
+                string nombreEdit = LeerSoloLetras("\n  Nuevo nombre: ");
+                string apellidoEdit = LeerSoloLetras("  Nuevo apellido: ");
+                string nuevoEmailEdit = LeerEmail("  Nuevo email: ");
+                gestion.EditarUsuario(emailEdit, nombreEdit, apellidoEdit, nuevoEmailEdit);
+                Exito("Usuario actualizado correctamente.");
+                break;
+
+            case "16":
+                Console.Clear();
+                Titulo("BUSCAR MATERIAL");
+                string isbnBuscarMat = LeerISBN("  ISBN del material: ");
+                try
+                {
+                    var matBuscado = gestion.BuscarMaterial(isbnBuscarMat);
+                    Console.WriteLine();
+                    MostrarMaterial(matBuscado);
+                }
+                catch (ArgumentException ex)
+                {
+                    Error(ex.Message);
+                }
+                break;
+
+            case "17":
+                Console.Clear();
+                Titulo("BUSCAR USUARIO");
+                string emailBuscarUsu = LeerEmail("  Email del usuario: ");
+                try
+                {
+                    var usuBuscado = gestion.BuscarUsuario(emailBuscarUsu);
+                    Console.WriteLine();
+                    MostrarUsuario(usuBuscado);
+                }
+                catch (ArgumentException ex)
+                {
+                    Error(ex.Message);
+                }
+                break;
+
+            case "18":
+                Console.Clear();
+                Titulo("SUSPENDER/HABILITAR PRÉSTAMO");
+                string emailEstado = LeerEmail("  Email del usuario: ");
+                var usuEstado = gestion.BuscarUsuario(emailEstado);
+                Console.WriteLine("\n  Usuario actual:");
+                MostrarUsuario(usuEstado);
+                Console.Write($"\n  Actualmente {(usuEstado.PuedePrestar ? "PUEDE" : "NO PUEDE")} realizar préstamos. ¿Cambiar estado? (s/n): ");
+                string confirmEstado = Console.ReadLine()!.Trim().ToLower();
+                if (confirmEstado == "s")
+                {
+                    gestion.CambiarEstadoPrestamo(emailEstado, !usuEstado.PuedePrestar);
+                    Exito($"Usuario ahora {(usuEstado.PuedePrestar ? "NO PUEDE" : "PUEDE")} realizar préstamos.");
+                }
+                else
+                    Console.WriteLine("\n  Operación cancelada.");
                 break;
 
             case "0":

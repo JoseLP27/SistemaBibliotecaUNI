@@ -1,11 +1,8 @@
-﻿//Necesario para el XML Serializer
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 [XmlInclude(typeof(Libro))]
 [XmlInclude(typeof(Revista))]
 [XmlInclude(typeof(Monografia))]
-
-//Necesario para el JSON serializer
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Libro), "Libro")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Revista), "Revista")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Monografia), "Monografia")]
@@ -26,6 +23,7 @@ public abstract class MaterialBibliografico
         AnioPublicacion = anioPublicacion;
         Stock = stock;
         Estado = EstadoMaterial.Disponible;
+        FechaIngreso = DateTime.Now;
     }
 
     protected MaterialBibliografico() { }
@@ -68,7 +66,7 @@ public abstract class MaterialBibliografico
         get => _anioPublicacion;
         set
         {
-            if (value < 1800 || value > 2026)
+            if (value < 1800 || value > DateTime.Now.Year)
                 throw new ArgumentException("[ERROR]: Año de publicación inválido.");
             _anioPublicacion = value;
         }
@@ -87,6 +85,8 @@ public abstract class MaterialBibliografico
         }
     }
 
+    public DateTime FechaIngreso { get; set; }
+
     public abstract int ObtenerDiasMaximos();
     public abstract int ObtenerTarifaMulta();
 
@@ -97,7 +97,7 @@ public abstract class MaterialBibliografico
 
     public override string ToString()
     {
-        return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Estado} - Stock: {Stock}";
+        return $"ISBN: {CodigoISBN} - Titulo: {Titulo} - Autor: {Autor} - Anio de publicacion: {AnioPublicacion} - Estado: {Estado} - Stock: {Stock} - Ingreso: {FechaIngreso:dd/MM/yyyy}";
     }
 
 }

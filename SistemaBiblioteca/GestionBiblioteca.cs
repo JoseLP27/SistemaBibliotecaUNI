@@ -58,6 +58,22 @@
             ?? throw new ArgumentException("[ERROR]: Material no encontrado.");
     }
 
+    public void EditarMaterial(string isbn, string titulo, string autor, int stock)
+    {
+        MaterialBibliografico material = _materialRepo.Buscar(m => m.CodigoISBN == isbn)
+            ?? throw new ArgumentException("[ERROR]: Material no encontrado.");
+
+        material.Titulo = titulo;
+        material.Autor = autor;
+        material.Stock = stock;
+        if (material.Stock == 0)
+            material.Estado = EstadoMaterial.Agotado;
+        else if (material.Estado == EstadoMaterial.Agotado)
+            material.Estado = EstadoMaterial.Disponible;
+
+        _materialRepo.Actualizar(m => m.CodigoISBN == isbn, material);
+    }
+
     // ─── USUARIOS ─────────────────────────────────────────
     public void RegistrarEstudiante(string nombre, string apellido,
         string carnet, string carrera, string email)
@@ -91,6 +107,30 @@
     {
         return _usuarioRepo.Buscar(u => u.Email == email)
             ?? throw new ArgumentException("[ERROR]: Usuario no encontrado.");
+    }
+
+    public void EditarUsuario(string email, string nombre, string apellido, string nuevoEmail)
+    {
+        Usuario usuario = _usuarioRepo.Buscar(u => u.Email == email)
+            ?? throw new ArgumentException("[ERROR]: Usuario no encontrado.");
+
+        if (nuevoEmail != email && _usuarioRepo.Buscar(u => u.Email == nuevoEmail) != null)
+            throw new InvalidOperationException("[ERROR]: Ya existe un usuario con ese email.");
+
+        usuario.Nombre = nombre;
+        usuario.Apellido = apellido;
+        usuario.Email = nuevoEmail;
+
+        _usuarioRepo.Actualizar(u => u.Email == email, usuario);
+    }
+
+    public void CambiarEstadoPrestamo(string email, bool puedePrestar)
+    {
+        Usuario usuario = _usuarioRepo.Buscar(u => u.Email == email)
+            ?? throw new ArgumentException("[ERROR]: Usuario no encontrado.");
+
+        usuario.PuedePrestar = puedePrestar;
+        _usuarioRepo.Actualizar(u => u.Email == email, usuario);
     }
 
     // ─── PRÉSTAMOS ────────────────────────────────────────
@@ -129,7 +169,7 @@
         _usuarioRepo.Actualizar(u => u.Email == emailUsuario, usuario);
     }
 
-    public double DevolverMaterial(string emailUsuario, string isbn)
+    public decimal DevolverMaterial(string emailUsuario, string isbn)
     {
         RegistroPrestamo prestamo = _prestamoRepo
             .Buscar(p => p.Usuario.Email == emailUsuario
@@ -137,10 +177,13 @@
                       && !p.Devuelto)
             ?? throw new ArgumentException("[ERROR]: Préstamo activo no encontrado.");
 
-        MaterialBibliografico material = _materialRepo.Buscar(m => m.CodigoISBN == isbn)!;
+        MaterialBibliografico material = _materialRepo.Buscar(m => m.CodigoISBN == isbn)
+            ?? throw new ArgumentException("[ERROR]: Material no encontrado.");
         material.Stock++;
         material.Estado = EstadoMaterial.Disponible;
         _materialRepo.Actualizar(m => m.CodigoISBN == isbn, material);
+
+        int diasRetraso = prestamo.CalcularDiasRetraso();
 
         prestamo.Devuelto = true;
         _prestamoRepo.Actualizar(
@@ -149,9 +192,9 @@
               && !p.Devuelto,
             prestamo);
 
-        Usuario usuario = _usuarioRepo.Buscar(u => u.Email == emailUsuario)!;
-        int diasRetraso = prestamo.CalcularDiasRetraso();
-        return diasRetraso > 0 ? usuario.CalcularMulta(diasRetraso) : 0;
+        Usuario usuario = _usuarioRepo.Buscar(u => u.Email == emailUsuario)
+            ?? throw new ArgumentException("[ERROR]: Usuario no encontrado.");
+        return diasRetraso > 0 ? usuario.CalcularMulta(diasRetraso, material) : 0;
     }
 
     public List<RegistroPrestamo> ObtenerPrestamosActivos()
@@ -181,7 +224,7 @@
             .ToList();
     }
 
-    public double ConsultarMulta(string email)
+    public decimal ConsultarMulta(string email)
     {
         Usuario usuario = _usuarioRepo.Buscar(u => u.Email == email)
             ?? throw new ArgumentException("[ERROR]: Usuario no encontrado.");
@@ -191,14 +234,14 @@
             .Where(p => p.Usuario.Email == email && !p.Devuelto)
             .ToList();
 
-        double total = 0;
+        decimal total = 0;
         foreach (RegistroPrestamo prestamo in prestamosActivos)
         {
             int diasRetraso = prestamo.CalcularDiasRetraso();
             if (diasRetraso > 0)
-                total += usuario.CalcularMulta(diasRetraso);
+                total += usuario.CalcularMulta(diasRetraso, prestamo.Material);
         }
         return total;
-
     }
+
 }

@@ -34,28 +34,17 @@ public class Estudiante : Usuario
     public string? Carrera
     {
         get => _carrera;
-        set
-        {
-            _carrera = ValidarTexto(value, "Carrera");
-        }
+        set { _carrera = ValidarTexto(value, "Carrera"); }
     }
 
     [XmlIgnore]
     public int AnioIngreso => _carnet != null ? int.Parse(_carnet.Substring(0, 4)) : 0;
 
-    public override int CalcularLimitePrestamos()
-    {
-        return 5;
-    }
+    public override int CalcularLimitePrestamos() => 5;
 
-    public override double CalcularMulta(int DiasRetraso)
+    public override decimal CalcularMulta(int diasRetraso, MaterialBibliografico material)
     {
-        int total = 0;
-        foreach (var libro in _librosPrestados.Values)
-        {
-            total += libro.ObtenerTarifaMulta() * DiasRetraso;
-        }
-        return total;
+        return diasRetraso * material.ObtenerTarifaMulta();
     }
 
 }

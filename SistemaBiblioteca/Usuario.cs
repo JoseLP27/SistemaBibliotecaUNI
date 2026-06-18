@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 [XmlInclude(typeof(Docente))]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Estudiante), "Estudiante")]
 [System.Text.Json.Serialization.JsonDerivedType(typeof(Docente), "Docente")]
-
 public abstract class Usuario
 {
     private string? _nombre;
@@ -57,11 +56,13 @@ public abstract class Usuario
         set => _contadorPrestamos = value;
     }
 
+    public DateTime FechaRegistro { get; set; }
+
     public void IncrementarContador() => _contadorPrestamos++;
 
     public string ValidarTexto(string? value, string campo)
     {
-        if (string.IsNullOrWhiteSpace(value) || string.IsNullOrEmpty(value))
+        if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException($"{campo} invalido.");
         return value.Trim();
     }
@@ -73,16 +74,17 @@ public abstract class Usuario
         Email = email;
         PuedePrestar = puedeprestar;
         _contadorPrestamos = 0;
+        FechaRegistro = DateTime.Now;
     }
 
     protected Usuario() { }
 
     public abstract int CalcularLimitePrestamos();
-    public abstract double CalcularMulta(int DiasRetraso);
+    public abstract decimal CalcularMulta(int diasRetraso, MaterialBibliografico material);
 
     public override string ToString()
     {
-        return $"Nombre: {NombreCompleto} | Email: {Email}";
+        return $"Nombre: {NombreCompleto} | Email: {Email} | Registro: {FechaRegistro:dd/MM/yyyy}";
     }
 
 }

@@ -1,4 +1,6 @@
-﻿public class Docente : Usuario
+﻿using System.Xml.Serialization;
+
+public class Docente : Usuario
 {
     private string? _codigoDocente;
     private string? _departamento;
@@ -36,23 +38,14 @@
         }
     }
 
-    public override int CalcularLimitePrestamos()
+    public override int CalcularLimitePrestamos() => 10;
+
+    public override decimal CalcularMulta(int diasRetraso, MaterialBibliografico material)
     {
-        return 10;
-    }
-
-    public override double CalcularMulta(int DiasRetraso)
-    {
-        double total = 0;
-        foreach (var libro in _librosPrestados.Values)
-            total += libro.ObtenerTarifaMulta() * DiasRetraso;
-
-        if (DiasRetraso <= 3 && _librosPrestados.Count <= 3)
-            total = total * 0.70;
-
+        decimal total = diasRetraso * material.ObtenerTarifaMulta();
+        if (diasRetraso <= 3)
+            total *= 0.70m;
         return total;
     }
-
-    
 
 }
